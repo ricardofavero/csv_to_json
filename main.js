@@ -23,6 +23,23 @@ var converter = new Converter({
 });
 var converter2 = new Converter({});
 
+function renameVisibilityFields(array){
+  _.forEach(array, function(value, key) {
+    //value.invisible = [];
+    //value.see_all = [];
+    _.forEach(value, function(value2, key2) {
+      if(key2 == "field11"){
+        value.invisible = value2;
+      }
+      if(key2 == "field12"){
+        value.see_all = value2;
+      }
+    });
+    delete value.field11;
+    delete value.field12;
+  });
+}
+
 function convertAddresses(array){
 
   _.forEach(array, function(value, key) {
@@ -120,6 +137,19 @@ function convertAddresses(array){
   });
 }
 
+function fixVisibility(array){
+  _.forEach(array, function(value, key) {/*
+    if(value.field11 == '1' || value.field11 == 1 || value.field11 == 'yes')
+      value.field11 = JSON.parse("true");
+    else value.field11 = JSON.parse("false");
+    if(value.field12 == '1' || value.field12 == 1 || value.field12 == 'yes')
+      value.field12 = JSON.parse("true");
+    else value.field12 = JSON.parse("false");*/
+    value.field11 = ( (value.field11 == "yes") || (value.field11 == "1") || (value.field11 == 1));
+    value.field12 = ( (value.field12 == "yes") || (value.field12 == "1") || (value.field12 == 1));
+  });
+}
+
 function fixPhones(array){
   _.forEach(array, function(value, key) {
       value.field6 = (value.field6).replace(/[^0-9]/g, '');
@@ -180,6 +210,14 @@ function compareAndMerge(first, second) {
         first.field9 = second.field9 = [].concat(first.field9, second.field9);
         first.field10 = second.field10 = [].concat(first.field10, second.field10);
 
+
+
+        first.field11 = second.field11 = (first.field11 || second.field11);
+
+        first.field12 = second.field12 = (first.field12 || second.field12);
+
+
+
         return true;
     }
     return false;
@@ -191,6 +229,7 @@ converter.on("end_parsed", function (jsonArray) {
    mergeClasses(jsonArray);
    fixPhones(jsonArray);
    fixEmails(jsonArray);
+   fixVisibility(jsonArray);
 
    var merged = merge(jsonArray);
    _.forEach(merged, function(value, key) {
@@ -198,13 +237,14 @@ converter.on("end_parsed", function (jsonArray) {
    });
 
    convertAddresses(merged);
+   renameVisibilityFields(merged);
    //console.log(merged);
 
    var str = JSON.stringify(merged, null, 2);
    console.log(str);
 
-   //var fs = require('fs');
-   //fs.writeFile('output.json', JSON.stringify(merged, 4, 4));
+   var fs = require('fs');
+   fs.writeFile('output.json', JSON.stringify(merged, 4, 4));
 
 });
 
