@@ -1,0 +1,116 @@
+[
+    {
+        "fullname": "John Doe 1",
+        "eid": 1234,
+        "classes": [
+            "Sala 1",
+            "Sala 2",
+            "Sala 3",
+            "Sala 4",
+            "Sala 5",
+            "Sala 6"
+        ],
+        "field5": [
+            "johndoepai2@gmail.com",
+            "johndoepai3@gmail.com",
+            ""
+        ],
+        "field6": "5519985504400",
+        "field7": [
+            "551138839333",
+            "551138839332"
+        ],
+        "field8": [
+            "",
+            "johndoemae1@gmail.com"
+        ],
+        "field9": [
+            "",
+            "johndoealuno1@gmail.com"
+        ],
+        "field10": [
+            "",
+            ""
+        ],
+        "field11": 1,
+        "field12": "",
+        "addresses": [
+            {
+                "type": "email",
+                "tags": [
+                    "Responsável",
+                    "Pai"
+                ],
+                "address": "johndoepai2@gmail.com"
+            },
+            {
+                "type": "email",
+                "tags": [
+                    "Responsável",
+                    "Pai"
+                ],
+                "address": "johndoepai3@gmail.com"
+            }
+        ]
+    },
+    {
+        "fullname": "Mary Doe 2",
+        "eid": 1235,
+        "classes": [
+            "Sala 1",
+            ""
+        ],
+        "field5": [
+            "marydoe1@gmail.com"
+        ],
+        "field6": "",
+        "field7": "551198334228",
+        "field8": "",
+        "field9": "",
+        "field10": "",
+        "field11": 0,
+        "field12": "no",
+        "addresses": [
+            {
+                "type": "email",
+                "tags": [
+                    "Responsável",
+                    "Pai"
+                ],
+                "address": "marydoe1@gmail.com"
+            }
+        ]
+    },
+    {
+        "fullname": "Victor Doe 3",
+        "eid": 1236,
+        "classes": [
+            "Sala 6",
+            "Sala 7"
+        ],
+        "field5": [
+            "victordoepai1@hotmail.com"
+        ],
+        "field6": "",
+        "field7": "",
+        "field8": [
+            "victordoe3@gmail.com"
+        ],
+        "field9": [
+            "victordoe3@gmail.com"
+        ],
+        "field10": "551974430033",
+        "field11": "",
+        "field12": "",
+        "addresses": [
+            {
+                "type": "email",
+                "tags": [
+                    "Responsável",
+                    "Pai"
+                ],
+                "address": "victordoepai1@hotmail.com"
+            }
+        ]
+    }
+]
