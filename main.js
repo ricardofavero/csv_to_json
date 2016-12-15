@@ -1,265 +1,224 @@
-// Load the full build.
+/* Create a program in Node.js where the input defined in input.csv
+is parsed and organized into the content shown in output.json.
+JSON order is not important, but content is.
+Don't hard code the tags shown, meaning tags could be changed to
+"email Tio, Reponsável, Financeiro" and it would still parse accordingly.*/
+
+// Author: Ricardo Guiotto Favero
+
+// Import libraries
 var _ = require('lodash');
+var Converter = require("csvtojson").Converter;
+var inspector = require('schema-inspector');
 
 var headers;
 
-var inspector = require('schema-inspector');
+// Layout for the first 3 properties
 var sanitization = {
     type: 'object',
     properties: {
-        fullname: { type: 'string', rules: ['trim', 'title'] },
-        eid: { type: 'integer' },
+        fullname: {
+            type: 'string',
+            rules: ['trim', 'title']
+        },
+        eid: {
+            type: 'integer'
+        },
         classes: {
-        			type: "array",
-        			items: { type: "string", rules: ["trim"] }
-        		}
+            type: "array",
+            items: {
+                type: "string",
+                rules: ["trim"]
+            }
+        }
     }
 };
 
-//Converter Class
-var Converter = require("csvtojson").Converter;
+// Converter Class
 var converter = new Converter({
-  headers:['fullname', 'eid', 'classes']
+    headers: ['fullname', 'eid', 'classes']
 });
-var converter2 = new Converter({});
 
-function renameVisibilityFields(array){
-  _.forEach(array, function(value, key) {
-    //value.invisible = [];
-    //value.see_all = [];
-    _.forEach(value, function(value2, key2) {
-      if(key2 == "field11"){
-        value.invisible = value2;
-      }
-      if(key2 == "field12"){
-        value.see_all = value2;
-      }
+// Merge addresses
+function mergeAddresses(people) {
+    _.forEach(people, function(person) {
+        _.forEach(person, function(value, key) {
+            if (key == "addresses")
+                person.addresses = _.uniqWith(value, compareAndMergeAddresses);
+        });
     });
-    delete value.field11;
-    delete value.field12;
-  });
 }
 
-function convertAddresses(array){
-
-  _.forEach(array, function(value, key) {
-    value.addresses = [];
-    _.forEach(value, function(value2, key2) {
-
-      if(key2 == "field5"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[3][1]);
-          tags_tmp.push(headers[3][2]);
-          address_tmp.type = headers[3][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-      if(key2 == "field6"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[4][1]);
-          address_tmp.type = headers[4][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-      if(key2 == "field7"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[5][1]);
-          tags_tmp.push(headers[5][2]);
-          address_tmp.type = headers[5][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-      if(key2 == "field8"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[6][1]);
-          address_tmp.type = headers[6][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-      if(key2 == "field9"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[7][1]);
-          address_tmp.type = headers[7][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-      if(key2 == "field10"){
-        _.forEach(value2, function(value3, key3) {
-          var address_tmp = {type: "", tags: "", address: ""};
-          var tags_tmp = [];
-          tags_tmp.push(headers[8][1]);
-          address_tmp.type = headers[8][0];
-          address_tmp.tags = tags_tmp;
-          address_tmp.address = value3;
-          if(address_tmp.address != '')
-            value.addresses.push(address_tmp);
-        });
-      }
-
-    });
-
-    delete value.field5;
-    delete value.field6;
-    delete value.field7;
-    delete value.field8;
-    delete value.field9;
-    delete value.field10;
-  });
-}
-
-function fixVisibility(array){
-  _.forEach(array, function(value, key) {/*
-    if(value.field11 == '1' || value.field11 == 1 || value.field11 == 'yes')
-      value.field11 = JSON.parse("true");
-    else value.field11 = JSON.parse("false");
-    if(value.field12 == '1' || value.field12 == 1 || value.field12 == 'yes')
-      value.field12 = JSON.parse("true");
-    else value.field12 = JSON.parse("false");*/
-    value.field11 = ( (value.field11 == "yes") || (value.field11 == "1") || (value.field11 == 1));
-    value.field12 = ( (value.field12 == "yes") || (value.field12 == "1") || (value.field12 == 1));
-  });
-}
-
-function fixPhones(array){
-  _.forEach(array, function(value, key) {
-      value.field6 = (value.field6).replace(/[^0-9]/g, '');
-      value.field7 = (value.field7).replace(/[^0-9]/g, '');
-      value.field10 = (value.field10).replace(/[^0-9]/g, '');
-      if((value.field6.length < 10) || (value.field6.length > 11)) value.field6 = '';
-      else value.field6 = JSON.parse("[" + '55' + value.field6 + "]");
-      if((value.field7.length < 10) || (value.field7.length > 11)) value.field7 = '';
-      else value.field7 = JSON.parse("[" + '55' + value.field7 + "]");
-      if((value.field10.length < 10) || (value.field10.length > 11)) value.field10 = '';
-      else value.field10 = JSON.parse("[" + '55' + value.field10 + "]");
-});
-}
-
-function fixClasses(array){
-  _.forEach(array, function(value, key) {
-    value.classes = value.classes.split("/");
-    value.field4 = value.field4.split(",");
-  });
-}
-
-function isValidEmail(email){
-  if(_.includes(email, ' ') || !(_.includes(email, '@')))
+// Comparator function for addresses
+function compareAndMergeAddresses(first, second) {
+    if (first.address === second.address) {
+        first.tags = second.tags = [].concat(first.tags, second.tags);
+        return true;
+    }
     return false;
-  else return true;
 }
 
-function fixEmails(array){
-  _.forEach(array, function(value, key) {
-    if(!isValidEmail(value.field5)) value.field5 = '';
-    else value.field5 = value.field5.split('/');
-    if(!isValidEmail(value.field8)) value.field8 = '';
-    else value.field8 = value.field8.split('/');
-    if(!isValidEmail(value.field9)) value.field9 = '';
-    else value.field9 = value.field9.split('/');
-});
+// Convert the basic array of addresses to the specified layout
+function convertAddresses(people) {
+    _.forEach(people, function(person) {
+        person.addresses = [];
+        var keys = Object.keys(person); // get list of keys, "fullname", "field5", "field6" etc
+
+        for (j = 3; j <= 8; j++) { // 3 to 8 because we need field5 to field10. Print out the 'keys' variable to see the location of each field
+            _.forEach(person[keys[j]], function(address_value) { // iterate through all items of arrays field5 to field10
+                var address_tmp = {type: "", tags: "", address: ""};
+                var tags_tmp = [];
+
+                // here we create temporary objects and set their values using data from our 'headers' object. +1 because we had a duplicated 'class' at the beggining
+                address_tmp.type = headers[j + 1][0];
+                for (i = 1; i < headers[j + 1].length; i++)
+                    tags_tmp.push(headers[j + 1][i]);
+                address_tmp.tags = tags_tmp;
+                address_tmp.address = address_value;
+
+                // we now add the temporary object to our main object
+                if (address_tmp.address != '')
+                    person.addresses.push(address_tmp);
+            });
+
+            // we can now delete the older objects from our main object
+            delete person[keys[j]];
+        }
+
+    });
 }
 
-function mergeClasses(array){
-  _.forEach(array, function(value, key) {
-      value.classes = [].concat(value.classes, value.field4);
-      delete value.field4;
-});
+// Change yes, 1s, 0 and no to boolean
+function fixVisibility(people) {
+    _.forEach(people, function(person) {
+        person.field11 = ((person.field11 == "yes") || (person.field11 == "1") || (person.field11 == 1));
+        person.field12 = ((person.field12 == "yes") || (person.field12 == "1") || (person.field12 == 1));
+    });
 }
 
+// Convert phone numbers to specified format
+function fixPhones(people) {
+    _.forEach(people, function(person) {
+        var keys = ['field6', 'field7', 'field10']; // select our phone fields
+        _.forEach(keys, function(k) {
+            person[k] = person[k].replace(/[^0-9]/g, ''); // remove everything that is not a number
+            if ((person[k].length < 10) || (person[k].length > 11)) person[k] = ''; // validate number
+            else person[k] = JSON.parse("[" + '55' + person[k] + "]"); // add country code
+        });
+    });
+}
+
+// Split classes
+function fixClasses(people) {
+    _.forEach(people, function(person) {
+        person.classes = person.classes.split("/");
+        person.field4 = person.field4.split(",");
+    });
+}
+
+// Verify if an email is valid
+function isValidEmail(email) {
+    if (_.includes(email, ' ') || !(_.includes(email, '@')))
+        return false;
+    else return true;
+}
+
+// Split emails if valid
+function fixEmails(people) {
+    _.forEach(people, function(person) {
+        var keys = ['field5', 'field8', 'field9']; // select our email fields
+        _.forEach(keys, function(k) {
+            if (!isValidEmail(person[k])) person[k] = '';
+            else person[k] = person[k].split('/');
+        });
+    });
+}
+
+// Merge classes
+function mergeClasses(people) {
+    _.forEach(people, function(person) {
+        if (person.field4 != '')
+            person.classes = [].concat(person.classes, person.field4);
+        delete person.field4;
+    });
+}
+
+// Merge people
 function merge(people) {
-  return _.uniqWith(people, compareAndMerge)
+    return _.uniqWith(people, compareAndMerge)
 }
 
+// Comparator for people
 function compareAndMerge(first, second) {
     if (first.eid === second.eid) {
         first.classes = second.classes = [].concat(second.classes, first.classes);
 
-        first.field5 = second.field5 = [].concat(first.field5, second.field5);
-        first.field6 = second.field6 = [].concat(first.field6, second.field6);
-        first.field7 = second.field7 = [].concat(first.field7, second.field7);
-        first.field8 = second.field8 = [].concat(first.field8, second.field8);
-        first.field9 = second.field9 = [].concat(first.field9, second.field9);
-        first.field10 = second.field10 = [].concat(first.field10, second.field10);
+        var keys = Object.keys(first); // get list of keys, "fullname", "field5", "field6" etc
+        for (j = 3; j <= 8; j++)
+            first[keys[j]] = second[keys[j]] = [].concat(first[keys[j]], second[keys[j]]);
 
-
-
-        first.field11 = second.field11 = (first.field11 || second.field11);
-
-        first.field12 = second.field12 = (first.field12 || second.field12);
-
-
+        for (j = 9; j <= 10; j++)
+            first[keys[j]] = second[keys[j]] = (first[keys[j]] || second[keys[j]]);
 
         return true;
     }
     return false;
 }
 
-converter.on("end_parsed", function (jsonArray) {
+// Rename the last 2 headers to their original names
+function renameVisibilityFields(people) {
+    _.forEach(people, function(person) {
+        _.forEach(person, function(value, key) {
+            if (key == "field11")
+                person.invisible = value;
+            if (key == "field12")
+                person.see_all = value;
+        });
+        delete person.field11;
+        delete person.field12;
+    });
+}
 
-   fixClasses(jsonArray);
-   mergeClasses(jsonArray);
-   fixPhones(jsonArray);
-   fixEmails(jsonArray);
-   fixVisibility(jsonArray);
+// When we finish reading from csv
+converter.on("end_parsed", function(jsonArray) {
+    //console.log(headers);
+    fixClasses(jsonArray);
+    mergeClasses(jsonArray);
+    fixPhones(jsonArray);
+    fixEmails(jsonArray);
+    fixVisibility(jsonArray);
 
-   var merged = merge(jsonArray);
-   _.forEach(merged, function(value, key) {
-     inspector.sanitize(sanitization, value);
-   });
+    var mergedArray = merge(jsonArray);
 
-   convertAddresses(merged);
-   renameVisibilityFields(merged);
-   //console.log(merged);
+    _.forEach(mergedArray, function(value) {
+        inspector.sanitize(sanitization, value);
+    });
 
-   var str = JSON.stringify(merged, null, 2);
-   console.log(str);
+    convertAddresses(mergedArray);
+    renameVisibilityFields(mergedArray);
+    mergeAddresses(mergedArray);
 
-   var fs = require('fs');
-   fs.writeFile('output.json', JSON.stringify(merged, 4, 4));
+    // show json object on screen
+    var str = JSON.stringify(mergedArray, null, 2);
+    console.log(str);
+
+    // write json object to file
+    var fs = require('fs');
+    fs.writeFile('output.json', JSON.stringify(mergedArray));
 
 });
 
-converter2.on("end_parsed", function (jsonArray) {
-  headers = _.keys(jsonArray[0]);
-  _.forEach(headers, function(value, key) {
+// Get first line from csv and convert it to our header object
+converter.preProcessLine = function(line, lineNumber) {
+    if (lineNumber === 1) {
+        headers = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        _.forEach(headers, function(value, key) {
+            headers[key] = headers[key].replace(/,/g, '');
+            headers[key] = headers[key].replace(/"/g, '');
+            headers[key] = headers[key].split(" "); // split headers into separated string objects
+        });
+    }
+    return line;
+}
 
-    var tmp = value.replace(',','');
-    headers[key] = tmp.split(" ");
-
-
-  });
-
-});
-
-//read from file
-require("fs").createReadStream("./input.csv").pipe(converter2);
 require("fs").createReadStream("./input.csv").pipe(converter);
